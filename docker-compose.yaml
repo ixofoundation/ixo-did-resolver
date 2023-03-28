@@ -9,6 +9,6 @@ services:
     image: ixo-did-resolver
     restart: unless-stopped
     volumes:
-      - './:/usr/src/app'
+      - ./:/app
     ports:
       - '8080:8080'
