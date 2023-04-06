@@ -1,6 +1,7 @@
 import { createQueryClient, utils } from '@ixo/impactxclient-sdk';
 import { QueryIidDocumentResponse } from '@ixo/impactxclient-sdk/types/codegen/ixo/iid/v1beta1/query';
 import { DidResolution, QueryClientType } from './types';
+import { updateObjectStrings } from './helpers';
 
 require('dotenv').config();
 
@@ -56,6 +57,17 @@ export class IxoResolver {
         } as any;
         return didResolution;
       }
+
+      // update did doc to replace all string tempaltes {id} with the id of the did doc
+      updateObjectStrings(didDoc.iidDocument, '{id}', parsed.did);
+
+      // replace context key with @context
+      didDoc.iidDocument['@context'] = [
+        // temporarily adding below context for other services till most services support object contexts
+        'https://www.w3.org/ns/did/v1',
+        ...didDoc.iidDocument.context,
+      ];
+      delete didDoc.iidDocument.context;
 
       // convert Timestamp to js dates
       didDoc.iidDocument.metadata.created = utils.proto.fromTimestamp(

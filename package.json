@@ -1,6 +1,6 @@
 {
   "name": "ixo-did-resolver",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "DID resolver for x/ixo DID methods",
   "author": "Ixo <ixo>",
   "license": "Apache 2.0",
