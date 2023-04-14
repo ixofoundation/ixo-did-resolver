@@ -5,7 +5,7 @@ import { AppModule } from './app.module';
 const port = process.env.PORT || 8080;
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create(AppModule, { cors: true });
 
   const config = new DocumentBuilder()
     .setTitle('DID Resolver for x/ixo DID method')
