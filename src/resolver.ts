@@ -36,6 +36,16 @@ export class IxoResolver {
       //   didUrl: 'did:x:zQ3shoiydFD6jdTdXLPProPZWL6igg9bCyaJY6zEKqQoNE96C'
       // }
 
+      const didResolution: DidResolution = {
+        // '@context': 'https://w3id.org/did-resolution/v1',
+        didResolutionMetadata: {
+          contentType: 'application/did+ld+json',
+          pattern: '^did:(?x:|ixo:).+$',
+        },
+        didDocument: null,
+        didDocumentMetadata: {},
+      };
+
       let didDoc: QueryIidDocumentResponse;
 
       try {
@@ -48,6 +58,7 @@ export class IxoResolver {
         didResolution.didResolutionMetadata.retrieved = new Date();
         didResolution.didResolutionMetadata.did = parsed;
       } catch (error) {
+        console.error({ error });
         // if error return with resolution metadata not found
         didResolution.didResolutionMetadata = {
           error: 'invalidDid',
@@ -92,13 +103,3 @@ export class IxoResolver {
     return { x: resolve, ixo: resolve };
   }
 }
-
-export const didResolution: DidResolution = {
-  // '@context': 'https://w3id.org/did-resolution/v1',
-  didResolutionMetadata: {
-    contentType: 'application/did+ld+json',
-    pattern: '^did:(?x:|ixo:).+$',
-  },
-  didDocument: null,
-  didDocumentMetadata: {},
-};
