@@ -1,5 +1,6 @@
-import { Controller, Get, Param } from '@nestjs/common';
+import { Controller, Get, Header, Param, Res } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
+import { Response } from 'express';
 import { AppService } from './app.service';
 
 @ApiTags('DID Resolution')
@@ -13,7 +14,22 @@ export class AppController {
   }
 
   @Get('/1.0/identifiers/:did')
-  getDid(@Param('did') did: string) {
-    return this.appService.getDid(did);
+  @Header('Content-Type', 'application/did+ld+json')
+  async getDid(
+    @Param('did') did: string,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    const result = await this.appService.getDid(did);
+
+    const error = result?.didResolutionMetadata?.error;
+    if (error === 'notFound') {
+      res.status(404);
+    } else if (error === 'invalidDid') {
+      res.status(400);
+    } else if (error) {
+      res.status(500);
+    }
+
+    return result;
   }
 }
