@@ -66,7 +66,7 @@ The driver recognizes the following environment variables:
 - Default value(ixo chain): `https://impacthub-rpc.lavenderfive.com/`
 - For testing pusposes you can use ixo's testnet(https://testnet.ixo.earth/rpc/) and devnet(https://devnet.ixo.earth/rpc/) chains.
 
-This resolver was build following https://github.com/decentralized-identity/universal-resolver/blob/main/docs/driver-development.md
+This resolver was build following https://github.com/decentralized-identity/universal-resolver/blob/main/docs/driver-development.md.
 
 ## 🙋 Find us elsewhere
 
