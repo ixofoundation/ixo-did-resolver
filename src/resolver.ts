@@ -40,7 +40,7 @@ export class IxoResolver {
         // '@context': 'https://w3id.org/did-resolution/v1',
         didResolutionMetadata: {
           contentType: 'application/did+ld+json',
-          pattern: '^did:(?x:|ixo:).+$',
+          pattern: '^did:(?:x|ixo):.+$',
         },
         didDocument: null,
         didDocumentMetadata: {},
@@ -61,7 +61,7 @@ export class IxoResolver {
         console.error({ error });
         // if error return with resolution metadata not found
         didResolution.didResolutionMetadata = {
-          error: 'invalidDid',
+          error: 'notFound',
           retrieved: new Date(),
           message: `Can't resolve did: ${parsed.did}`,
           did: parsed,

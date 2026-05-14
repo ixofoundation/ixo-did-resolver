@@ -15,7 +15,7 @@ This is a [Universal Resolver](https://github.com/decentralized-identity/univers
 ## Example DIDs
 
 ```
-did:x:zQ3shoiydFD6jdTdXLPProPZWL6igg9bCyaJY6zEKqQoNE96C
+did:ixo:ixo1rl9vhhxg0t7ywlh953gtthphg889v7d3e2gx7k
 ```
 
 ## Development
@@ -27,7 +27,7 @@ Start development server: `yarn start`
 By default it will be running on port `8080` - it should connect to the blockchain node and be ready to serve DIDs at that endpoint. Example:
 
 ```
-curl http://localhost:8080/1.0/identifiers/did:dock:5CDsD8HZa6TeSfgmMcxAkbSXYWeob4jFQmtU6sxr4XWTZzUA
+curl http://localhost:8080/1.0/identifiers/did:ixo:ixo1rl9vhhxg0t7ywlh953gtthphg889v7d3e2gx7k
 ```
 
 ## Build and usage
@@ -54,7 +54,7 @@ curl http://localhost:8080/1.0/identifiers/did:dock:5CDsD8HZa6TeSfgmMcxAkbSXYWeo
    docker exec -it ixo-did-resolver /bin/sh
    ```
 
-1. The server responds at `/1.0/identifiers/<DID with method, like did:x:...>`
+1. The server responds at `/1.0/identifiers/<DID with method, like did:ixo:...>`
 
 ## Driver Environment Variables
 
