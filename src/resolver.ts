@@ -1,7 +1,7 @@
 import { createQueryClient, utils } from '@ixo/impactxclient-sdk';
 import { QueryIidDocumentResponse } from '@ixo/impactxclient-sdk/types/codegen/ixo/iid/v1beta1/query';
 import { DidResolution, QueryClientType } from './types';
-import { renameKeyDeep, updateObjectStrings } from './helpers';
+import { renameKeyDeep, toDidCoreDatetime, updateObjectStrings } from './helpers';
 
 const W3C_DID_CONTEXT = 'https://www.w3.org/ns/did/v1';
 const IXO_IID_CONTEXT = 'https://w3id.org/ixo/ns/interchain-identifiers/v1';
@@ -95,12 +95,14 @@ export class IxoResolver {
       ];
       delete didDoc.iidDocument.context;
 
-      // convert Timestamp to js dates
-      didDoc.iidDocument.metadata.created = utils.proto.fromTimestamp(
-        didDoc.iidDocument.metadata.created,
+      // Convert protobuf Timestamp to ISO 8601 strings WITHOUT sub-second
+      // precision, as required by W3C DID Core §7.1.3 for didDocumentMetadata
+      // `created` / `updated`.
+      didDoc.iidDocument.metadata.created = toDidCoreDatetime(
+        utils.proto.fromTimestamp(didDoc.iidDocument.metadata.created),
       ) as any;
-      didDoc.iidDocument.metadata.updated = utils.proto.fromTimestamp(
-        didDoc.iidDocument.metadata.updated,
+      didDoc.iidDocument.metadata.updated = toDidCoreDatetime(
+        utils.proto.fromTimestamp(didDoc.iidDocument.metadata.updated),
       ) as any;
       // assign metadata that returned on didDoc from registry to response metadata
       didResolution.didDocumentMetadata = Object.assign(
