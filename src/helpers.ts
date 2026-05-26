@@ -22,6 +22,14 @@ export const updateObjectStrings = (
 };
 
 /**
+ * Format a Date as an ISO 8601 string in UTC with no sub-second precision,
+ * as required by W3C DID Core §7.1.3 for didDocumentMetadata datetime
+ * values (e.g. `2026-03-09T05:11:03Z`, not `...03.719Z`).
+ */
+export const toDidCoreDatetime = (date: Date): string =>
+  date.toISOString().replace(/\.\d{3}Z$/, 'Z');
+
+/**
  * Recursively renames every occurrence of `oldKey` to `newKey` on plain objects.
  * Used to canonicalise chain proto field names (e.g. `blockchainAccountID`)
  * to their DID-compatible JSON casing (`blockchainAccountId`).
