@@ -1,7 +1,10 @@
 import { createQueryClient, utils } from '@ixo/impactxclient-sdk';
 import { QueryIidDocumentResponse } from '@ixo/impactxclient-sdk/types/codegen/ixo/iid/v1beta1/query';
 import { DidResolution, QueryClientType } from './types';
-import { updateObjectStrings } from './helpers';
+import { renameKeyDeep, updateObjectStrings } from './helpers';
+
+const W3C_DID_CONTEXT = 'https://www.w3.org/ns/did/v1';
+const IXO_IID_CONTEXT = 'https://w3id.org/ixo/ns/interchain-identifiers/v1';
 
 require('dotenv').config();
 
@@ -72,10 +75,22 @@ export class IxoResolver {
       // update did doc to replace all string tempaltes {id} with the id of the did doc
       updateObjectStrings(didDoc.iidDocument, '{id}', parsed.did);
 
-      // replace context key with @context
+      // Canonicalise chain proto field name `blockchainAccountID` to the
+      // DID-compatible JSON casing `blockchainAccountId` (CAIP-10 / DID Core).
+      renameKeyDeep(
+        didDoc.iidDocument,
+        'blockchainAccountID',
+        'blockchainAccountId',
+      );
+
+      // Per W3C DID Core §6.3.1, the JSON-LD `@context` MUST start with
+      // `https://www.w3.org/ns/did/v1` and MUST define every term used in the
+      // document. We prepend the canonical W3C + IXO contexts, then append
+      // any on-chain `context` entries the controller has set on the IID
+      // document.
       didDoc.iidDocument['@context'] = [
-        // temporarily adding below context for other services till most services support object contexts
-        'https://www.w3.org/ns/did/v1',
+        W3C_DID_CONTEXT,
+        IXO_IID_CONTEXT,
         ...didDoc.iidDocument.context,
       ];
       delete didDoc.iidDocument.context;
