@@ -4,7 +4,7 @@ import { DidResolution, QueryClientType } from './types';
 import { renameKeyDeep, toDidCoreDatetime, updateObjectStrings } from './helpers';
 
 const W3C_DID_CONTEXT = 'https://www.w3.org/ns/did/v1';
-const IXO_IID_CONTEXT = 'https://w3id.org/ixo/ns/interchain-identifiers/v1';
+const IXO_DID_CONTEXT = 'https://w3id.org/ixo/ns/did/v1';
 
 require('dotenv').config();
 
@@ -90,7 +90,7 @@ export class IxoResolver {
       // document.
       didDoc.iidDocument['@context'] = [
         W3C_DID_CONTEXT,
-        IXO_IID_CONTEXT,
+        IXO_DID_CONTEXT,
         ...didDoc.iidDocument.context,
       ];
       delete didDoc.iidDocument.context;
