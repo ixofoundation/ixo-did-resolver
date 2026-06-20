@@ -45,17 +45,26 @@ export class AppController {
       };
     }
 
-    const wantsJsonLd = JSON_LD_TYPES.includes(matched as string);
-    const responseContentType = wantsJsonLd
-      ? 'application/did+ld+json'
-      : 'application/did+json';
+    // Only an EXPLICIT request for the DID-JSON representation
+    // (`application/did+json`) is served without `@context`. The generic
+    // `application/json` — which is what default HTTP clients send (axios sends
+    // `application/json, text/plain, */*`; fetch sends `*/*`) — and a bare `*/*`
+    // both default to JSON-LD, the canonical did:ixo representation. A JSON-LD
+    // document is also valid JSON, so a non-opinionated `application/json` client
+    // is well served, while JSON-LD consumers (e.g. Veramo credential
+    // verification, which needs `@context` to expand `assertionMethod` /
+    // `controller`) are never silently handed a context-less document.
+    const wantsPlainDidJson = matched === 'application/did+json';
+    const responseContentType = wantsPlainDidJson
+      ? 'application/did+json'
+      : 'application/did+ld+json';
 
     const result = await this.appService.getDid(did);
 
     // For the plain DID JSON representation, strip the JSON-LD-only
     // `@context` entry from the DID document and reflect the actual
     // content type in the resolution metadata.
-    if (!wantsJsonLd && result?.didDocument) {
+    if (wantsPlainDidJson && result?.didDocument) {
       delete result.didDocument['@context'];
     }
     if (result?.didResolutionMetadata && result.didDocument) {

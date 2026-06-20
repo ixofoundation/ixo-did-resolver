@@ -1,75 +1,97 @@
 ![DIF Logo](https://raw.githubusercontent.com/decentralized-identity/universal-resolver/master/docs/logo-dif.png)
 
-# Universal Resolver Driver: did:x/ixo
+# Universal Resolver Driver: did:ixo / did:x
 
 ![GitHub contributors](https://img.shields.io/github/contributors/ixofoundation/ixo-did-resolver)
 ![GitHub repo size](https://img.shields.io/github/repo-size/ixofoundation/ixo-did-resolver)
 
-This is a [Universal Resolver](https://github.com/decentralized-identity/universal-resolver/) driver for **did:x/ixo** identifiers.
+A [Universal Resolver](https://github.com/decentralized-identity/universal-resolver/) driver that resolves **`did:ixo`** (and the legacy **`did:x`**) identifiers from the ixo blockchain into W3C DID documents.
 
-## Specifications
+It reads the on-chain IID document via the chain's RPC endpoint and returns a DID resolution result over HTTP, following the [Universal Resolver driver spec](https://github.com/decentralized-identity/universal-resolver/blob/main/docs/driver-development.md) and [W3C DID Core §7 (Resolution)](https://www.w3.org/TR/did-core/#did-resolution).
 
-- [W3C Decentralized Identifiers](https://w3c.github.io/did-core/)
-<!-- - [DID Method Spec](https://github.com/ibct-dev/lit-DID/blob/main/docs/did:lit-method-spec_eng_v0.1.0.md) -->
+## API
+
+### `GET /1.0/identifiers/:did`
+
+Resolves a DID and returns a [DID resolution result](https://www.w3.org/TR/did-core/#did-resolution-metadata) (`didDocument`, `didResolutionMetadata`, `didDocumentMetadata`).
+
+```bash
+curl http://localhost:8080/1.0/identifiers/did:ixo:entity:54bede0aced5282b2401c58a048a731a
+```
+
+Status codes: `200` resolved · `400` `invalidDid` · `404` `notFound` · `406` `representationNotSupported` · `500` on internal error.
+
+### Content negotiation
+
+Per W3C DID Core §6, the driver serves both DID representations based on the request's `Accept` header:
+
+| `Accept` | Response | `@context` |
+| --- | --- | --- |
+| `application/did+ld+json`, `application/ld+json` | DID JSON-LD | included |
+| `application/json`, `*/*`, or no `Accept` header | DID JSON-LD (default) | included |
+| `application/did+json` | DID JSON | omitted |
+| anything else | `406 representationNotSupported` | — |
+
+Only an **explicit** `application/did+json` request is served without `@context`. Generic clients (a bare `application/json`, `*/*`, or no header — the defaults sent by `fetch` and `axios`) receive the canonical JSON-LD representation, so JSON-LD consumers (e.g. verifiable-credential verification, which needs `@context` to expand `assertionMethod` / `controller`) are never handed a context-less document.
+
+## Environment variables
+
+| Variable | Description | Default |
+| --- | --- | --- |
+| `RPC_ENDPOINT` | ixo chain JSON-RPC endpoint the driver queries. | `https://impacthub.ixo.world/rpc/` (mainnet) |
+| `PORT` | HTTP port the driver listens on. | `8080` |
+
+ixo network RPC endpoints:
+
+| Network | `RPC_ENDPOINT` |
+| --- | --- |
+| mainnet | `https://impacthub.ixo.world/rpc/` |
+| testnet | `https://testnet.ixo.earth/rpc/` |
+| devnet | `https://devnet.ixo.earth/rpc/` |
+
+## Development
+
+```bash
+yarn install        # install dependencies
+yarn start          # start the driver (default port 8080)
+yarn start:dev      # start in watch mode
+yarn build          # compile to dist/
+yarn test           # run unit tests
+```
+
+Example against a running instance:
+
+```bash
+curl -H "Accept: application/did+ld+json" \
+  http://localhost:8080/1.0/identifiers/did:ixo:entity:54bede0aced5282b2401c58a048a731a
+```
+
+## Docker
+
+```bash
+# build
+docker image build -t ixo-did-resolver -f Dockerfile .
+
+# run (maps host 8080 -> container 8080)
+docker container run \
+  --publish 8080:8080 \
+  --env RPC_ENDPOINT=https://impacthub.ixo.world/rpc/ \
+  --detach --name ixo-did-resolver \
+  ixo-did-resolver:latest
+```
 
 ## Example DIDs
 
 ```
+did:ixo:entity:54bede0aced5282b2401c58a048a731a
 did:ixo:ixo1rl9vhhxg0t7ywlh953gtthphg889v7d3e2gx7k
 ```
 
-## Development
+## Specifications
 
-Install NPM dependencies using yarn in the root directory: `yarn install`
+- [W3C Decentralized Identifiers (DID) Core](https://www.w3.org/TR/did-core/)
+- [Universal Resolver driver development](https://github.com/decentralized-identity/universal-resolver/blob/main/docs/driver-development.md)
 
-Start development server: `yarn start`
+## License
 
-By default it will be running on port `8080` - it should connect to the blockchain node and be ready to serve DIDs at that endpoint. Example:
-
-```
-curl http://localhost:8080/1.0/identifiers/did:ixo:ixo1rl9vhhxg0t7ywlh953gtthphg889v7d3e2gx7k
-```
-
-## Build and usage
-
-1. To build the docker image
-
-   ```
-   docker image build -t ixo-did-resolver -f Dockerfile .
-   ```
-
-   The above will build the image with name `ixo-did-resolver` and tag `latest`.
-
-1. To run the docker container
-
-   ```
-   docker container run --publish 8080:8080 --detach --name ixo-did-resolver ixo-did-resolver:latest
-   ```
-
-   The server will run at 8080 port in the docker container and the host’s port 8080 is mapped to the container's port 8080
-
-1. To ssh into the docker container
-
-   ```
-   docker exec -it ixo-did-resolver /bin/sh
-   ```
-
-1. The server responds at `/1.0/identifiers/<DID with method, like did:ixo:...>`
-
-## Driver Environment Variables
-
-The driver recognizes the following environment variables:
-
-### `RPC_ENDPOINT`
-
-- The endpoint of node for JSON-RPC
-- Default value(ixo chain): `https://impacthub-rpc.lavenderfive.com/`
-- For testing pusposes you can use ixo's testnet(https://testnet.ixo.earth/rpc/) and devnet(https://devnet.ixo.earth/rpc/) chains.
-
-This resolver was build following https://github.com/decentralized-identity/universal-resolver/blob/main/docs/driver-development.md.
-
-## 🙋 Find us elsewhere
-
-[![Discord](https://img.shields.io/badge/Discord-7289DA?style=for-the-badge&logo=discord&logoColor=white)](https://discord.com/invite/ixo) [![Telegram](https://img.shields.io/badge/Telegram-2CA5E0?style=for-the-badge&logo=telegram&logoColor=white)](https://t.me/ixonetwork)
-[![Twitter](https://img.shields.io/badge/Twitter-1DA1F2?style=for-the-badge&logo=twitter&logoColor=white)](https://twitter.com/ixoworld)
-[![Medium](https://img.shields.io/badge/Medium-12100E?style=for-the-badge&logo=medium&logoColor=white)](https://medium.com/ixo-blog)
+Apache-2.0
