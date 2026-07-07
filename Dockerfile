@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1.7
 
 # --- Build stage: install all deps and compile ---
-FROM node:20-alpine AS builder
+FROM node:24-alpine AS builder
 
 WORKDIR /app
 
@@ -15,7 +15,7 @@ RUN yarn build
 RUN yarn install --production --ignore-scripts --prefer-offline --pure-lockfile --non-interactive
 
 # --- Runtime stage: minimal image with only production deps and built output ---
-FROM node:20-alpine AS runtime
+FROM node:24-alpine AS runtime
 
 ENV NODE_ENV=production
 WORKDIR /app

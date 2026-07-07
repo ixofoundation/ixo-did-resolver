@@ -19,7 +19,7 @@ export class IxoResolver {
 
   async init_query_client() {
     this.queryClient = await createQueryClient(
-      process.env.RPC_ENDPOINT || 'https://impacthub-rpc.lavenderfive.com/',
+      process.env.RPC_ENDPOINT || 'https://impacthub.ixo.world/rpc/',
     );
   }
 
